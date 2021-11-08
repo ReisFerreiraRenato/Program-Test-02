@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2021/09/26 10:38:18.000.096,D:\BackEnd\BackEnd.dproj=D:\Projeto\Project1.dproj</Transaction>
+    <Transaction>2021/09/26 10:57:12.000.363,=D:\BackEnd\Unit1.pas</Transaction>
+    <Transaction>2021/09/26 10:57:29.000.115,D:\BackEnd\untFuncoes.pas=D:\BackEnd\Unit1.pas</Transaction>
+    <Transaction>2021/09/26 13:23:52.000.879,=D:\BackEnd\Unit1.pas</Transaction>
+    <Transaction>2021/09/26 13:29:34.000.022,D:\BackEnd\untDataModulo.dfm=D:\BackEnd\Unit1.dfm</Transaction>
+    <Transaction>2021/09/26 13:29:34.000.022,D:\BackEnd\untDataModulo.pas=D:\BackEnd\Unit1.pas</Transaction>
+    <Transaction>2021/09/26 13:33:44.000.825,=D:\BackEnd\Unit1.pas</Transaction>
+    <Transaction>2021/09/26 13:34:42.000.851,=D:\Projeto\untClasses.pas</Transaction>
+    <Transaction>2021/09/26 13:35:01.000.480,D:\Projeto\untClasses.pas=</Transaction>
+    <Transaction>2021/09/26 13:35:44.000.852,=D:\BackEnd\untClasses.pas</Transaction>
+  </Transactions>
+</BorlandProject>

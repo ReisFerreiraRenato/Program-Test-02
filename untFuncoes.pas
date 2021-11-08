@@ -1,0 +1,150 @@
+unit untFuncoes;
+
+interface
+
+uses System.JSON, Data.DB, Data.Win.ADODB, System.SysUtils, vcl.StdCtrls, ActiveX,System.Classes;
+
+  function BuscarUsuarioNome(prmNome: String): TStringlist;
+
+  function MontarQuery(var prmQuery: TADOQuery; LocScript: String): Boolean;
+
+  function RemoverAcentos(prmString: String): String;    //Não deu tempo buscar uma solução
+                                                         //para retornar-los com os acentos
+implementation
+
+uses untDataModulo, untClasses, Rest.Json;
+
+function BuscarUsuarioNome(prmNome: String): TStringlist;
+var
+  LocScript: String;
+  LocObjCliente: TCliente;
+  LocArrayClientes: array of TCliente;
+  LocContato: TContato;
+  LocQuery: TADOQuery;
+  LocContador: Integer;
+  LocJson : TStringlist;
+  DataModulo : TDataModuloPrincipal;
+  LocObjetoJson: TJSONObject;
+begin
+  try
+    CoInitialize(nil);
+
+    DataModulo := TDataModuloPrincipal.Create(nil);
+
+    DataModulo.qryBuscaCliente.Close;
+    DataModulo.qryBuscaCliente.Parameters.ParamByName('prmNome').Value := '%'+prmNome+'%';
+    DataModulo.qryBuscaCliente.Open;
+
+    with DataModulo do
+    begin
+      if qryBuscaCliente.RecordCount > 0 then
+      begin
+        qryBuscaCliente.First;
+        while not qryBuscaCliente.Eof do
+        begin
+          LocObjCliente := TCliente.Create;
+          LocObjCliente.ID          := qryBuscaCliente.FieldByName('ID').Value;
+          LocObjCliente.Nome        := RemoverAcentos(qryBuscaCliente.FieldByName('Nome').AsString);
+          LocObjCliente.CEP         := qryBuscaCliente.FieldByName('CEP').Value;
+          LocObjCliente.Logradouro  := qryBuscaCliente.FieldByName('Logradouro').Value;
+          LocObjCliente.Numero      := qryBuscaCliente.FieldByName('Numero').Value;
+          if not (qryBuscaCliente.FieldByName('Complemento').AsString = '') then
+            LocObjCliente.Complemento := qryBuscaCliente.FieldByName('Complemento').Value;
+          LocObjCliente.Cidade      := qryBuscaCliente.FieldByName('Cidade').Value;
+          LocObjCliente.Sigla_UF    := qryBuscaCliente.FieldByName('Sigla_UF').Value;
+          LocObjCliente.IBGE_Cidade := qryBuscaCliente.FieldByName('IBGE_Cidade').Value;
+          LocObjCliente.IBGE_UF     := qryBuscaCliente.FieldByName('IBGE_UF').Value;
+
+          qryContatos.Close;
+          qryContatos.Parameters.ParamByName('prmIDCliente').Value := LocObjCliente.ID;
+          qryContatos.Open;
+
+          if qryContatos.RecordCount > 0 then
+          begin
+            qryContatos.First;
+            while not qryContatos.Eof do
+            begin
+              LocContato           := TContato.Create(LocObjCliente.ID);
+              LocContato.ID        := qryContatos.FieldByName('ID').AsInteger;
+              LocContato.Nome      := RemoverAcentos(qryContatos.FieldByName('Nome').AsString);
+              LocContato.Data_Nasc := qryContatos.FieldByName('Data_Nasc').Value;
+              LocContato.Idade     := qryContatos.FieldByName('Idade').Value;
+              LocContato.Telefone  := qryContatos.FieldByName('Telefone').Value;
+
+              LocObjCliente.InserirContato(LocContato);
+              qryContatos.Next;
+            end;
+          end;
+          SetLength(LocArrayClientes, Length(LocArrayClientes)+1);
+          LocArrayClientes[Length(LocArrayClientes)-1]:= LocObjCliente;
+          qryBuscaCliente.Next;
+        end;
+
+        LocJson := TStringlist.Create;
+        for LocContador := 0 to Length(LocArrayClientes)-1 do
+        begin
+          LocJson.Text := LocJson.Text + UTF8Decode((TJson.ObjectToJsonString( LocArrayClientes[LocContador])));
+        end;
+
+        Result := LocJson;
+      end
+      else
+        Result:= nil;
+    end;
+
+  finally
+    if Assigned(DataModulo) then
+      FreeAndNil(DataModulo);
+  end;
+
+end;
+
+
+//Função para montar query
+function MontarQuery(var prmQuery: TADOQuery; LocScript: String): Boolean;
+begin
+  try
+    if LocScript = '' then
+      Exit;
+
+    prmQuery := TADOQuery.Create(nil);
+    prmQuery.Connection := DataModuloPrincipal.ConexaoPrincipal;
+    prmQuery.SQL.Clear;
+    prmQuery.SQL.Add(LocScript);
+    prmQuery.Open;
+    Result := True;
+  except
+    result := False;
+  end;
+end;
+
+function RemoverAcentos(prmString: String): String;
+var
+  LocString: String;
+begin
+  LocString := prmString.Replace('á','a');
+  LocString := LocString.Replace('ã','a');
+  LocString := LocString.Replace('â','a');
+  LocString := LocString.Replace('à','a');
+  LocString := LocString.Replace('ä','a');
+  LocString := LocString.Replace('ê','e');
+  LocString := LocString.Replace('é','e');
+  LocString := LocString.Replace('ë','e');
+  LocString := LocString.Replace('í','i');
+  LocString := LocString.Replace('î','i');
+  LocString := LocString.Replace('ì','i');
+  LocString := LocString.Replace('ï','i');
+  LocString := LocString.Replace('õ','o');
+  LocString := LocString.Replace('ô','o');
+  LocString := LocString.Replace('ö','o');
+  LocString := LocString.Replace('ò','o');
+  LocString := LocString.Replace('ó','o');
+  LocString := LocString.Replace('ü','u');
+  LocString := LocString.Replace('û','u');
+  LocString := LocString.Replace('ù','u');
+  LocString := LocString.Replace('ü','u');
+  LocString := LocString.Replace('ç','c');
+  Result := LocString;
+end;
+
+end.
